@@ -77,8 +77,10 @@ public class Match3 : MonoBehaviour
                 int val = board[x, y].value;
                 if (val <= 0) continue;
                 GameObject p = Instantiate(nodePiece, gameBoard);
+                NodePiece node = p.GetComponent<NodePiece>();
                 RectTransform rect = p.GetComponent<RectTransform>();
                 rect.anchoredPosition = new Vector2(32 + (78 * x), -32 - (80 * y));
+                node.Initialize(val, new Point(x, y), pieces[val - 1]);
             }
         }
     }
