@@ -21,6 +21,9 @@ public class Match3 : MonoBehaviour
     private int height = 8;
     private Node[,] board;
 
+    public ComboScore combo;
+    public Enemy enemy;
+
     private System.Random random;
     private int[] fills;
 
@@ -57,9 +60,9 @@ public class Match3 : MonoBehaviour
             fills[x] = Mathf.Clamp(fills[x] - 1, 0, width);
             List<Point> connected = isConnected(piece.index, true);
             bool wasFlipped = (flip != null);
-
             if (wasFlipped)
             {
+
                 flippedPiece = flip.getOtherPiece(piece);
                 AddPoints(ref connected, isConnected(flippedPiece.index, true));
             }
@@ -72,22 +75,32 @@ public class Match3 : MonoBehaviour
             }
             else //Being called if we made a match
             {
+                combo.combo_count += 1;
+
                 foreach (Point pnt in connected) //Remove the node pieces when connected
                 {
                     KillPiece(pnt);
                     Node node = getNodeAtPoint(pnt);
                     NodePieces nodePiece = node.getPiece();
+                    if(node.value == 3)
+                    {
+                        enemy.TakeDamage(5);
+                    }
                     if (nodePiece != null)
                     {
                         nodePiece.gameObject.SetActive(false);
                         deadPieces.Add(nodePiece);
                     }
+
                     node.SetPiece(null);
                 }
+
                 BoardGravity();
             }
             flipped.Remove(flip); //remove the flip after update
+
             update.Remove(piece);
+
         }
     }
 
@@ -130,7 +143,6 @@ public class Match3 : MonoBehaviour
                             NodePieces revived = deadPieces[0];
                             revived.gameObject.SetActive(true);
                             piece = revived;
-
                             deadPieces.RemoveAt(0);
                         }
                         else
@@ -257,6 +269,8 @@ public class Match3 : MonoBehaviour
 
     public void FlipPieces(Point one, Point two, bool main)
     {
+        combo.combo_count = 0;
+
         if (getValueAtPoint(one) < 0) return;
         Node nodeOne = getNodeAtPoint(one);
         Node nodeTwo = getNodeAtPoint(two);
@@ -264,6 +278,7 @@ public class Match3 : MonoBehaviour
         NodePieces pieceTwo = nodeTwo.getPiece();
         if (getValueAtPoint(two) > 0)
         {
+
             nodeOne.SetPiece(pieceTwo);
             nodeTwo.SetPiece(pieceOne);
             if (main)
@@ -283,6 +298,7 @@ public class Match3 : MonoBehaviour
 
     private void KillPiece(Point p)
     {
+
         List<KilledPiece> available = new List<KilledPiece>();
         for (int i = 0; i < killed.Count; i++)
         {
@@ -298,6 +314,7 @@ public class Match3 : MonoBehaviour
             KilledPiece kPiece = kill.GetComponent<KilledPiece>();
             set = kPiece;
             killed.Add(kPiece);
+
         }
 
         int val = getValueAtPoint(p) - 1;
@@ -402,6 +419,7 @@ public class Match3 : MonoBehaviour
     {
         int val = 1;
         val = (random.Next(0, 100) / (100 / pieces.Length)) + 1;
+
         return val;
     }
 
